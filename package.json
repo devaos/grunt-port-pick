@@ -1,0 +1,40 @@
+{
+  "name": "grunt-portpick",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Scan and pick an available port, for other grunt tasks",
+  "main": "grunt.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devaos/grunt-portpick.git"
+  },
+  "keywords": [
+    "grunt",
+    "gruntplugin",
+    "port",
+    "scan",
+    "available"
+  ],
+  "author": "Ari Aosved",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devaos/grunt-portpick/issues"
+  },
+  "dependencies": {
+    "portscanner": "~0.2.3",
+    "async": "~0.7.0"
+  },
+  "peerDependencies": {
+    "grunt": "*"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.4",
+    "matchdep": "~0.3.0",
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt-contrib-clean": "~0.5",
+    "grunt-contrib-nodeunit": "~0.3.3"
+  }
+}
