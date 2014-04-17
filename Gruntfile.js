@@ -90,6 +90,22 @@ module.exports = function(grunt) {
       tests: ['tests/*_test.js']
     }
 
+
+    // Automate version bumps
+    //   grunt release:patch
+    //   grunt release:minor
+    //   grunt release:major
+
+    release: {
+      options: {
+        add: false,
+        npm: true,
+        tagName: 'v<%= version %>',
+        commitMessage: 'v<%= version %>',
+        tagMessage: 'v<%= version %>'
+      }
+    }
+
   })
 
   grunt.loadTasks('tasks')
