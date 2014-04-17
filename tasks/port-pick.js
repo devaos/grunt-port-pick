@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2014 Ari Aosved
- * http://github.com/devaos/portpick/blob/master/LICENSE
+ * http://github.com/devaos/grunt-port-pick/blob/master/LICENSE
  */
 
 'use strict';
@@ -41,7 +41,7 @@ module.exports = function(grunt) {
     })
   }
 
-  grunt.registerMultiTask('portpick',
+  grunt.registerMultiTask('portPick',
     'Scan and pick an available port, for other grunt tasks', function() {
 
     //==========================================================================
@@ -78,6 +78,9 @@ module.exports = function(grunt) {
 
       // Set some configurations for extra ports template interpolation
       function(callback) {
+        if(options.extra == 0)
+          done()
+
         for(var i = 0; i < options.extra; i++) {
           var step = i
           async.waterfall([

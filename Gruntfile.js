@@ -29,7 +29,7 @@ module.exports = function(grunt) {
     },
 
     // Configuration to be run and then tested.
-    portpick: {
+    portPick: {
       options: {
         port: 8000,
         extra: 1
@@ -119,8 +119,8 @@ module.exports = function(grunt) {
       }
     }
 
-    new Array('portpick.concurrentFuncTest1',
-     'portpick.concurrentFuncTest2').forEach(function(test){
+    new Array('portPick.concurrentFuncTest1',
+     'portPick.concurrentFuncTest2').forEach(function(test){
         prop = grunt.config.get(test)
 
         if(typeof prop !== 'undefined')
@@ -145,7 +145,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'clean:coverage',
     'testRunSetup',
-    'portpick',
+    'portPick',
     'testRunTearDown',
     'nodeunit',
     'clean:coverage'

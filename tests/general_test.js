@@ -1,7 +1,7 @@
 'use strict';
 
 var grunt = require('grunt'),
-    portpick = require('../tasks/portpick')
+    portPick = require('../tasks/port-pick')
 
 /*
   ======== A Handy Little Nodeunit Reference ========
@@ -23,7 +23,7 @@ var grunt = require('grunt'),
     test.ifError(value)
 */
 
-exports.portpick = {
+exports.portPick = {
   develFilesOk: [
   ],
   setUp: function(done) {
@@ -35,13 +35,13 @@ exports.portpick = {
     done()
   },
   findPortLimitTest: function(test) {
-    var p = new portpick(grunt)
+    var p = new portPick(grunt)
     test.equal(65534, p.findPortLimit(1, false))
     test.equal(1, p.findPortLimit(65534, false))
     test.done()
   },
   findPortTest: function(test) {
-    var p = new portpick(grunt)
+    var p = new portPick(grunt)
     test.notEqual(false, p.findPort())
     test.done()
   }

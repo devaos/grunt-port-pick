@@ -1,18 +1,18 @@
-#grunt-portpick
-[![Build Status](https://travis-ci.org/devaos/grunt-portpick.svg?branch=master)](https://travis-ci.org/devaos/grunt-portpick) [![Dependency Status](https://david-dm.org/devaos/grunt-portpick.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick) [![devDependency Status](https://david-dm.org/devaos/grunt-portpick/dev-status.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick#info=devDependencies) [![Coverage Status](https://coveralls.io/repos/devaos/grunt-portpick/badge.png)](https://coveralls.io/r/devaos/grunt-portpick)
+#grunt-port-pick
+[![Build Status](https://travis-ci.org/devaos/grunt-port-pick.svg?branch=master)](https://travis-ci.org/devaos/grunt-port-pick) [![Dependency Status](https://david-dm.org/devaos/grunt-port-pick.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-port-pick) [![devDependency Status](https://david-dm.org/devaos/grunt-port-pick/dev-status.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-port-pick#info=devDependencies) [![Coverage Status](https://coveralls.io/repos/devaos/grunt-port-pick/badge.png)](https://coveralls.io/r/devaos/grunt-port-pick)
 
 ##Installation
 
 Install npm package:
 
 ```bash
-npm install grunt-portpick --save-dev
+npm install grunt-port-pick --save-dev
 ```
 
 Add the following to your project's `Gruntfile` in order to load the task:
 
 ```js
-grunt.loadNpmTasks('grunt-portpick');
+grunt.loadNpmTasks('grunt-port-pick');
 ```
 
 ##Usage Examples
@@ -24,7 +24,7 @@ Tired of manually configuring ports only to have them conflict?  This task will 
 ```js
 // Project configuration.
 grunt.initConfig({
-  portpick: {
+  portPick: {
     options: {
       port: 8765,
       extra: 1
@@ -85,15 +85,16 @@ grunt.initConfig({
   }
 });
 
-grunt.registerTask('e2e1', [ 'portpick:concurrentFuncTest1', 'connect:test1', 'protractor:test1' ]);
-grunt.registerTask('e2e2', [ 'portpick:concurrentFuncTest1', 'connect:test2', 'protractor:test2' ]);
-grunt.registerTask('unit', [ 'portpick', 'karma:concurrent' ]);
+grunt.registerTask('e2e1', [ 'portPick:concurrentFuncTest1', 'connect:test1', 'protractor:test1' ]);
+grunt.registerTask('e2e2', [ 'portPick:concurrentFuncTest1', 'connect:test2', 'protractor:test2' ]);
+grunt.registerTask('unit', [ 'portPick', 'karma:concurrent' ]);
 
 grunt.registerTask('tests', [ 'concurrent:tests' ]);
 ```
 
 ##Options
 
-1. `port` -- The port to start scanning from, inclusive, for the first available port to use.
-2. `limit` -- Do not scan for a port after this one, fail if one is not found between `port` and `limit`.
-3. `extra` -- Set this number of open-port-# configurations for use by other tasks
+1. `port` -- The port to start scanning from, inclusive, for the first available port to use, defaults to 8765.
+2. `limit` -- Do not scan for a port after this one, fail if one is not found between `port` and `limit`, defaults to false (unlimited).
+3. `extra` -- Set this number of open-port-# configurations for use by other tasks, defaults to 0.
+4. `hostname` -- The hostname to bind to, defaults to 0.0.0.0 (all interfaces).
