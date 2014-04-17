@@ -1,5 +1,5 @@
 #grunt-portpick
-[![Build Status](https://travis-ci.org/devaos/grunt-portpick.svg?branch=master)](https://travis-ci.org/devaos/grunt-portpick) [![Dependency Status](https://david-dm.org/devaos/grunt-portpick.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick) [![devDependency Status](https://david-dm.org/devaos/grunt-portpick/dev-status.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick#info=devDependencies) [![Coverage Status](http://img.shields.io/coveralls/devaos/grunt-portpick/master.svg)](https://coveralls.io/r/devaos/grunt-portpick)
+[![Build Status](https://travis-ci.org/devaos/grunt-portpick.svg?branch=master)](https://travis-ci.org/devaos/grunt-portpick) [![Dependency Status](https://david-dm.org/devaos/grunt-portpick.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick) [![devDependency Status](https://david-dm.org/devaos/grunt-portpick/dev-status.svg?theme=shields.io)](https://david-dm.org/devaos/grunt-portpick#info=devDependencies) [![Coverage Status](https://coveralls.io/repos/devaos/grunt-portpick/badge.png)](https://coveralls.io/r/devaos/grunt-portpick)
 
 ##Installation
 
