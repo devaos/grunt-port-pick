@@ -88,8 +88,7 @@ module.exports = function(grunt) {
     // Unit tests.
     nodeunit: {
       tests: ['tests/*_test.js']
-    }
-
+    },
 
     // Automate version bumps
     //   grunt release:patch
