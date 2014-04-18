@@ -31,17 +31,39 @@ module.exports = function(grunt) {
     // Configuration to be run and then tested.
     portPick: {
       options: {
-        port: 8000,
+        port: 7654,
         extra: 1
       },
-      concurrentFuncTest1: [
-        'connect.test1.port',
-        'protractor.test1.args.seleniumPort'
-      ],
-      concurrentFuncTest2: [
-        'connect.test2.port',
-        'protractor.test2.args.seleniumPort'
-      ]
+      selenium: {
+        targets: [
+          'selenium.options.port',
+          'protractor.test1.args.seleniumPort',
+          'protractor.test2.args.seleniumPort'
+        ]
+      },
+      concurrentFuncTest1: {
+        options: {
+          name: 'port-pick-connect1'
+        },
+        targets: [
+          'connect.test1.port',
+        ]
+      },
+      concurrentFuncTest2: {
+        options: {
+          name: 'port-pick-connect2'
+        },
+        targets: [
+          'connect.test2.port',
+        ]
+      }
+    },
+
+    // Sample selenium runner.
+    selenium: {
+      options: {
+        port: -1
+      },
     },
 
     // Sample grunt-connect target to emulate two concurrently running web
@@ -61,14 +83,16 @@ module.exports = function(grunt) {
       test1: {
         options: {
           args: {
-            seleniumPort: -1
+            seleniumPort: -1,
+            baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect1") %>'
           }
         }
       },
       test2: {
         options: {
           args: {
-            seleniumPort: -1
+            seleniumPort: -1,
+            baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect2") %>'
           }
         }
       }
@@ -80,7 +104,7 @@ module.exports = function(grunt) {
     karma: {
       concurrent: {
         options: {
-          port: '<%= grunt.config.get("open-port-0") %>'
+          port: '<%= grunt.config.get("port-pick-1") %>'
         }
       }
     },
@@ -116,8 +140,19 @@ module.exports = function(grunt) {
   grunt.registerTask('testRunTearDown', function(){
     var prop, pass = 0, fail = 0, msg = '', used = {}
 
-    var validateConfig = function(prop, orig) {
+    var validateConfig = function(prop, orig, match) {
       var c = grunt.config.get(prop)
+      if(match) {
+        if(c.match(match)) {
+          pass++
+          grunt.config.set(prop, orig)
+        } else {
+          fail++
+          if(!msg)
+            msg = 'Functional test failed, ' + prop + ' was ' + c
+        }
+        return
+      }
       var p = parseInt(c)
       if(p != c || p <= 0) {
         fail++
@@ -134,18 +169,24 @@ module.exports = function(grunt) {
       }
     }
 
-    new Array('portPick.concurrentFuncTest1',
-     'portPick.concurrentFuncTest2').forEach(function(test){
+    new Array('portPick.concurrentFuncTest1.targets',
+     'portPick.concurrentFuncTest2.targets').forEach(function(test){
         prop = grunt.config.get(test)
 
         if(typeof prop !== 'undefined')
           prop.forEach(function(val){
-            validateConfig(val, -1)
+            validateConfig(val, -1, null)
           })
     })
 
+    validateConfig('protractor.test1.options.args.baseUrl',
+      'http://localhost:<%= grunt.config.get("port-pick-connect1") %>', /:\d{4}$/)
+
+    validateConfig('protractor.test2.options.args.baseUrl',
+      'http://localhost:<%= grunt.config.get("port-pick-connect2") %>', /:\d{4}$/)
+
     validateConfig('karma.concurrent.options.port',
-      '<%= grunt.config.get("open-port-0") %>')
+      '<%= grunt.config.get("port-pick-1") %>')
 
     if(fail > 0 || pass == 0)
       grunt.fatal(pass + '/' + (pass+fail) + ' functional tests passed' +

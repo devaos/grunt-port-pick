@@ -34,6 +34,10 @@ module.exports = function(grunt) {
     portscanner.findAPortNotInUse(options.port,
       options.port + options.limit, options.hostname,
       function(error, foundPort) {
+        // If we use a port, increment so that it isn't used again
+        if(foundPort !== false)
+          options.port = foundPort
+
         if(typeof callback === 'function')
           callback(null, foundPort)
         else
@@ -56,8 +60,12 @@ module.exports = function(grunt) {
 
     options.limit = pp.findPortLimit(options.port, options.limit)
 
-    if(!this.data || !(this.data instanceof Array)) {
-      this.data = []
+    if(!this.data || !(this.data instanceof Object)) {
+      this.data = {}
+
+      if(!this.data.targets || !(this.data.targets instanceof Array)) {
+        this.data.targets = []
+      }
     }
 
     //==========================================================================
@@ -70,18 +78,29 @@ module.exports = function(grunt) {
         if(selectedPort === false)
           grunt.fatal('No available port was found')
 
-        self.data.forEach(function(prop) {
+        self.data.targets.forEach(function(prop) {
           grunt.config.set(prop, selectedPort)
         })
+
+        if(options.name) {
+          console.log(options.name + '=' + selectedPort)
+          grunt.config.set(options.name, selectedPort)
+        }
+
         callback(null)
       },
 
       // Set some configurations for extra ports template interpolation
       function(callback) {
-        if(options.extra == 0)
-          done()
+        var doing = false
+        for(var i = 1; i <= options.extra; i++) {
+          var c = grunt.config.get('port-pick-' + i)
 
-        for(var i = 0; i < options.extra; i++) {
+          // With multiple tasks, do not find a port that we've already found
+          // in a previous task
+          if(c)
+            continue
+
           var step = i
           async.waterfall([
             pp.findPort,
@@ -90,7 +109,7 @@ module.exports = function(grunt) {
               if(selectedPort === false)
                 grunt.fatal('No available port was found')
 
-              grunt.config.set('open-port-' + this.step, selectedPort)
+              grunt.config.set('port-pick-' + this.step, selectedPort)
 
               if(step + 1 == options.extra)
                 done()
@@ -99,6 +118,9 @@ module.exports = function(grunt) {
             }.bind({step: i})
           ]);
         }
+
+        if(!doing)
+          done()
       }
     ])
   })

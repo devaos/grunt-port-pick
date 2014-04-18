@@ -24,19 +24,42 @@ Tired of manually configuring ports only to have them conflict?  This task will 
 ```js
 // Project configuration.
 grunt.initConfig({
+  // Configuration to be run and then tested.
   portPick: {
     options: {
-      port: 8765,
+      port: 7654,
       extra: 1
     },
-    concurrentFuncTest1: [
-      'connect.test1.port',
-      'protractor.test1.args.seleniumPort'
-    ],
-    concurrentFuncTest2: [
-      'connect.test2.port',
-      'protractor.test2.args.seleniumPort'
-    ]
+    selenium: {
+      targets: [
+        'selenium.options.port',
+        'protractor.test1.args.seleniumPort',
+        'protractor.test2.args.seleniumPort'
+      ]
+    },
+    concurrentFuncTest1: {
+      options: {
+        name: 'port-pick-connect1'
+      },
+      targets: [
+        'connect.test1.port',
+      ]
+    },
+    concurrentFuncTest2: {
+      options: {
+        name: 'port-pick-connect2'
+      },
+      targets: [
+        'connect.test2.port',
+      ]
+    }
+  },
+
+  // Sample selenium runner.
+  selenium: {
+    options: {
+      port: -1
+    },
   },
 
   // Sample grunt-connect target to emulate two concurrently running web
@@ -56,45 +79,48 @@ grunt.initConfig({
     test1: {
       options: {
         args: {
-          seleniumPort: -1
+          seleniumPort: -1,
+          baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect1") %>'
         }
       }
     },
     test2: {
       options: {
         args: {
-          seleniumPort: -1
+          seleniumPort: -1,
+          baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect2") %>'
         }
       }
     }
   },
 
   // Sample grunt-karma target to emulate the karma port selection for running
-  // unit tests alongside with our e2e tests above, using the "extra" option
-  // to have the port available via grunt templates.
+  // unit tests alongside with our e2e tests above, using the "extraPorts"
+  // option to have the port available via grunt templates.
   karma: {
     concurrent: {
       options: {
-        port: '<%= grunt.config.get("open-port-0") %>'
+        port: '<%= grunt.config.get("port-pick-1") %>'
       }
     }
-  }
+  },
 
   concurrent: {
-    tests: ['unit', 'e2e1', 'e2e2']
+    tests: ['unit', 'func1', 'func2']
   }
 });
 
-grunt.registerTask('e2e1', [ 'portPick:concurrentFuncTest1', 'connect:test1', 'protractor:test1' ]);
-grunt.registerTask('e2e2', [ 'portPick:concurrentFuncTest1', 'connect:test2', 'protractor:test2' ]);
-grunt.registerTask('unit', [ 'portPick', 'karma:concurrent' ]);
+grunt.registerTask('func1', [ 'portPick:concurrentFuncTest1', 'connect:test1', 'protractor:test1' ]);
+grunt.registerTask('func2', [ 'portPick:concurrentFuncTest1', 'connect:test2', 'protractor:test2' ]);
+grunt.registerTask('unit', [ 'karma:concurrent' ]);
 
-grunt.registerTask('tests', [ 'concurrent:tests' ]);
+grunt.registerTask('tests', [ 'portPick', 'selenium', 'concurrent:tests' ]);
 ```
 
 ##Options
 
-1. `port` -- The port to start scanning from, inclusive, for the first available port to use, defaults to 8765.
-2. `limit` -- Do not scan for a port after this one, fail if one is not found between `port` and `limit`, defaults to false (unlimited).
-3. `extra` -- Set this number of open-port-# configurations for use by other tasks, defaults to 0.
-4. `hostname` -- The hostname to bind to, defaults to 0.0.0.0 (all interfaces).
+1. `port` -- The port to start scanning from, inclusive, for the first available port to use.  Defaults to 8765.
+2. `limit` -- Do not scan for a port after this one, fail if one is not found between `port` and `limit`.  Defaults to false, port-pick will scan all the way up to 65535.
+3. `extra` -- Set the number of extra port-pick-# configurations to supply.  Defaults to 0.  If set to greater than 0, it will populate <%= port-pick-1 %>, <%= port-pick-2 %>, etc.
+4. `hostname` -- The IP/hostname to bind to when checking for available ports.  Defaults to 0.0.0.0, so binds to all interfaces.
+5. `name` -- Set the property name for port-pick to use when picking a port for a target.  Defaults to undefined where it will not populate a separate configuration with the target's selected port.
