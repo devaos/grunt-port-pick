@@ -83,7 +83,6 @@ module.exports = function(grunt) {
         })
 
         if(options.name) {
-          console.log(options.name + '=' + selectedPort)
           grunt.config.set(options.name, selectedPort)
         }
 
