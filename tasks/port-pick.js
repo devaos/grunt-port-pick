@@ -7,15 +7,17 @@
 
 module.exports = function(grunt) {
 
-  var portscanner = require('portscanner'),
-      pp = this,
-      options = {
-        hostname: '0.0.0.0',
+  var defaults = {
         port: 8765,
         limit: false,
-        extra: 0
+        extra: 0,
+        hostname: '0.0.0.0',
+        name: ''
       },
-      used = 0
+      portscanner = require('portscanner'),
+      options = defaults,
+      used = 0,
+      pp = this
 
   // Don't exceed the maximum port when scanning for an available one
   this.findPortLimit = function(start, limit) {
@@ -55,7 +57,7 @@ module.exports = function(grunt) {
         done = this.async(),
         self = this
 
-    options = this.options(options)
+    options = this.options(defaults)
 
     //==========================================================================
 
