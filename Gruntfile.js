@@ -201,7 +201,9 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'clean:coverage',
     'testRunSetup',
-    'portPick',
+    'portPick:selenium',
+    'portPick:concurrentFuncTest1',
+    'portPick:concurrentFuncTest2',
     'testRunTearDown',
     'nodeunit',
     'clean:coverage'

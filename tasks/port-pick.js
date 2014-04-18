@@ -14,7 +14,8 @@ module.exports = function(grunt) {
         port: 8765,
         limit: false,
         extra: 0
-      }
+      },
+      used = 0
 
   // Don't exceed the maximum port when scanning for an available one
   this.findPortLimit = function(start, limit) {
@@ -31,12 +32,12 @@ module.exports = function(grunt) {
 
   // Find an available port or bail if none is found
   this.findPort = function(callback) {
-    portscanner.findAPortNotInUse(options.port,
+    portscanner.findAPortNotInUse(options.port + used,
       options.port + options.limit, options.hostname,
       function(error, foundPort) {
         // If we use a port, increment so that it isn't used again
         if(foundPort !== false)
-          options.port = foundPort
+          used++
 
         if(typeof callback === 'function')
           callback(null, foundPort)
@@ -58,7 +59,7 @@ module.exports = function(grunt) {
 
     //==========================================================================
 
-    options.limit = pp.findPortLimit(options.port, options.limit)
+    options.limit = pp.findPortLimit(options.port + used, options.limit)
 
     if(!this.data || !(this.data instanceof Object)) {
       this.data = {}
@@ -80,10 +81,12 @@ module.exports = function(grunt) {
 
         self.data.targets.forEach(function(prop) {
           grunt.config.set(prop, selectedPort)
+          grunt.log.writeln( '>> '.green + prop + '=' + selectedPort)
         })
 
         if(options.name) {
           grunt.config.set(options.name, selectedPort)
+          grunt.log.writeln( '>> '.green + options.name + '=' + selectedPort)
         }
 
         callback(null)
@@ -97,8 +100,13 @@ module.exports = function(grunt) {
 
           // With multiple tasks, do not find a port that we've already found
           // in a previous task
-          if(c)
+          if(c) {
+            if(step + 1 >= options.extra && !doing)
+              done()
             continue
+          }
+          else
+            doing = true
 
           var step = i
           async.waterfall([
@@ -109,9 +117,12 @@ module.exports = function(grunt) {
                 grunt.fatal('No available port was found')
 
               grunt.config.set('port-pick-' + this.step, selectedPort)
+              grunt.log.writeln( '>> '.green + 'port-pick-' + this.step + '=' +
+                selectedPort)
 
-              if(step + 1 == options.extra)
+              if(step + 1 >= options.extra) {
                 done()
+              }
               else
                 callback(null)
             }.bind({step: i})
