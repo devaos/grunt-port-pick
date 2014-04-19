@@ -86,7 +86,7 @@ grunt.initConfig({
     },
   },
 
-  // Sample grunt-connect target to emulate two parallelly running web
+  // Sample grunt-connect target to emulate two concurrently running web
   // servers where the ports are dynamically set.
   connect: {
     test1: {
