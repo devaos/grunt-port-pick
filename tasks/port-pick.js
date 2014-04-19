@@ -19,7 +19,7 @@ module.exports = function(grunt) {
       first = false,
       last = false,
       used = [],
-      usePorts = [],
+      usePorts = false,
       pp = this
 
   // Don't exceed the maximum port when scanning for an available one
@@ -37,7 +37,7 @@ module.exports = function(grunt) {
 
   // Find an available port or bail if none is found
   this.findPort = function(callback) {
-    if(usePorts.length > 0) {
+    if(usePorts && usePorts.length > 0) {
       var foundPort = usePorts.shift()
       first = foundPort + 1
       used.push(foundPort)
@@ -103,10 +103,12 @@ module.exports = function(grunt) {
       this.data.targets = []
     }
 
-    var ports = grunt.option('portPickUsePorts')
+    if(!usePorts) {
+      var ports = grunt.option('portPickUsePorts')
 
-    if(ports) {
-      usePorts = ports.split(',')
+      if(ports) {
+        usePorts = ports.split(',')
+      }
     }
 
     //==========================================================================
