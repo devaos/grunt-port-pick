@@ -1,6 +1,6 @@
 {
   "name": "grunt-port-pick",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Scan and pick an available port, for other grunt tasks",
   "main": "grunt.js",
   "scripts": {
