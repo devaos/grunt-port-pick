@@ -19,12 +19,36 @@ grunt.loadNpmTasks('grunt-port-pick');
 
 Tired of manually configuring ports only to have them conflict?  This task will scan for an unused port, given a range, and swap in the unused port into other tasks' configurations.
 
-###Target the port configuration:
+###A basic example showing simple port picking:
 
 ```js
 // Project configuration.
 grunt.initConfig({
-  // Configuration to be run and then tested.
+  portPick: {
+    karma: {
+      targets: [
+        'karma.options.port'
+      ]
+    }
+  },
+
+  karma: {
+    options: {
+      port: -1
+    }
+  }
+});
+
+grunt.registerTask('test', [ 'portPick', 'karma' ]);
+```
+
+###A complex example showing various ways to use selected ports
+
+```js
+// Project configuration.
+grunt.initConfig({
+  // Specify what ports need to be injected where and what additional ports
+  // need to be allotted.
   portPick: {
     options: {
       port: 7654,
@@ -37,7 +61,7 @@ grunt.initConfig({
         'protractor.test2.args.seleniumPort'
       ]
     },
-    concurrentFuncTest1: {
+    parallelFuncTest1: {
       options: {
         name: 'port-pick-connect1'
       },
@@ -45,7 +69,7 @@ grunt.initConfig({
         'connect.test1.port',
       ]
     },
-    concurrentFuncTest2: {
+    parallelFuncTest2: {
       options: {
         name: 'port-pick-connect2'
       },
@@ -62,7 +86,7 @@ grunt.initConfig({
     },
   },
 
-  // Sample grunt-connect target to emulate two concurrently running web
+  // Sample grunt-connect target to emulate two parallelly running web
   // servers where the ports are dynamically set.
   connect: {
     test1: {
@@ -98,23 +122,35 @@ grunt.initConfig({
   // unit tests alongside with our e2e tests above, using the "extraPorts"
   // option to have the port available via grunt templates.
   karma: {
-    concurrent: {
+    parallel: {
       options: {
         port: '<%= grunt.config.get("port-pick-1") %>'
       }
     }
   },
 
-  concurrent: {
-    tests: ['unit', 'func1', 'func2']
-  }
+  parallel: {
+    options: {
+      stream: true
+    },
+    tests: {
+      tasks: [{
+        grunt: true,
+        args: [
+          'portPick',
+          'unit',
+          'func1',
+          'func2',
+          '--portPickUsePorts=<%= grunt.config.get("port-pick-used") %>']
+      }]
+    },
 });
 
-grunt.registerTask('func1', [ 'portPick:concurrentFuncTest1', 'connect:test1', 'protractor:test1' ]);
-grunt.registerTask('func2', [ 'portPick:concurrentFuncTest1', 'connect:test2', 'protractor:test2' ]);
-grunt.registerTask('unit', [ 'karma:concurrent' ]);
+grunt.registerTask('func1', [ 'portPick:parallelFuncTest1', 'connect:test1', 'protractor:test1' ]);
+grunt.registerTask('func2', [ 'portPick:parallelFuncTest1', 'connect:test2', 'protractor:test2' ]);
+grunt.registerTask('unit', [ 'karma:parallel' ]);
 
-grunt.registerTask('tests', [ 'portPick', 'selenium', 'concurrent:tests' ]);
+grunt.registerTask('test', [ 'portPick', 'selenium', 'parallel:tests' ]);
 ```
 
 ##Options
@@ -124,3 +160,7 @@ grunt.registerTask('tests', [ 'portPick', 'selenium', 'concurrent:tests' ]);
 3. `extra` -- Set the number of extra port-pick-# configurations to supply.  Defaults to 0.  If set to greater than 0, it will populate <%= port-pick-1 %>, <%= port-pick-2 %>, etc.
 4. `hostname` -- The IP/hostname to bind to when checking for available ports.  Defaults to 0.0.0.0, so binds to all interfaces.
 5. `name` -- Set the property name for port-pick to use when picking a port for a target.  Defaults to undefined where it will not populate a separate configuration with the target's selected port.
+
+##Command line options
+
+1. `--portPickUsePorts=#,#,...` -- A comma delimited list of ports to select from, instead of scanning for new unused ports.  This is useful if you need to provide the ports that were selected to spawned grunt tasks, such as when using [grunt-parallel](https://github.com/iammerrick/grunt-parallel) or [grunt-concurrent](https://github.com/sindresorhus/grunt-concurrent).  Defaults to undefined.

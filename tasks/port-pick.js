@@ -16,7 +16,8 @@ module.exports = function(grunt) {
       },
       portscanner = require('portscanner'),
       options = defaults,
-      used = 0,
+      used = [],
+      usePorts = [],
       pp = this
 
   // Don't exceed the maximum port when scanning for an available one
@@ -34,15 +35,32 @@ module.exports = function(grunt) {
 
   // Find an available port or bail if none is found
   this.findPort = function(callback) {
-    portscanner.findAPortNotInUse(options.port + used,
+    if(usePorts.length > 0) {
+      var foundPort = usePorts.shift()
+      used.push(foundPort)
+      grunt.config.set('port-pick-used', used.join(','))
+
+      if(typeof callback === 'function') {
+        callback(null, foundPort)
+        return
+      }
+      else
+        return foundPort
+    }
+
+    portscanner.findAPortNotInUse(options.port + used.length,
       options.port + options.limit, options.hostname,
       function(error, foundPort) {
         // If we use a port, increment so that it isn't used again
-        if(foundPort !== false)
-          used++
+        if(foundPort !== false) {
+          used.push(foundPort)
+          grunt.config.set('port-pick-used', used.join(','))
+        }
 
-        if(typeof callback === 'function')
+        if(typeof callback === 'function') {
           callback(null, foundPort)
+          return
+        }
         else
           return foundPort
     })
@@ -61,14 +79,20 @@ module.exports = function(grunt) {
 
     //==========================================================================
 
-    options.limit = pp.findPortLimit(options.port + used, options.limit)
+    options.limit = pp.findPortLimit(options.port + used.length, options.limit)
 
     if(!this.data || !(this.data instanceof Object)) {
       this.data = {}
+    }
 
-      if(!this.data.targets || !(this.data.targets instanceof Array)) {
-        this.data.targets = []
-      }
+    if(!this.data.targets || !(this.data.targets instanceof Array)) {
+      this.data.targets = []
+    }
+
+    var ports = grunt.option('portPickUsePorts')
+
+    if(ports) {
+      usePorts = ports.split(',')
     }
 
     //==========================================================================
@@ -92,6 +116,7 @@ module.exports = function(grunt) {
         }
 
         callback(null)
+        return
       },
 
       // Set some configurations for extra ports template interpolation
@@ -125,14 +150,18 @@ module.exports = function(grunt) {
               if(step + 1 >= options.extra) {
                 done()
               }
-              else
+              else {
                 callback(null)
+                return
+              }
             }.bind({step: i})
           ]);
         }
 
-        if(!doing)
+        if(!doing) {
           done()
+          return
+        }
       }
     ])
   })
