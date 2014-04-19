@@ -3,7 +3,7 @@
  * http://github.com/devaos/grunt-port-pick/blob/master/LICENSE
  */
 
-'use strict';
+'use strict'
 
 module.exports = function(grunt) {
 
@@ -16,6 +16,8 @@ module.exports = function(grunt) {
       },
       portscanner = require('portscanner'),
       options = defaults,
+      first = false,
+      last = false,
       used = [],
       usePorts = [],
       pp = this
@@ -30,13 +32,14 @@ module.exports = function(grunt) {
       }
     }
 
-    return limit;
+    return limit
   }
 
   // Find an available port or bail if none is found
   this.findPort = function(callback) {
     if(usePorts.length > 0) {
       var foundPort = usePorts.shift()
+      first = foundPort + 1
       used.push(foundPort)
       grunt.config.set('port-pick-used', used.join(','))
 
@@ -48,11 +51,11 @@ module.exports = function(grunt) {
         return foundPort
     }
 
-    portscanner.findAPortNotInUse(options.port + used.length,
-      options.port + options.limit, options.hostname,
+    portscanner.findAPortNotInUse(first, last, options.hostname,
       function(error, foundPort) {
         // If we use a port, increment so that it isn't used again
         if(foundPort !== false) {
+          first = foundPort + 1
           used.push(foundPort)
           grunt.config.set('port-pick-used', used.join(','))
         }
@@ -73,13 +76,24 @@ module.exports = function(grunt) {
 
     var async = require('async'),
         done = this.async(),
-        self = this
+        self = this,
+        newopts = false,
+        tmpopts = this.options(defaults)
 
-    options = this.options(defaults)
+    if(options.port != tmpopts.port || options.limit != tmpopts.limit)
+      newopts = true
+
+    options = tmpopts
 
     //==========================================================================
 
-    options.limit = pp.findPortLimit(options.port + used.length, options.limit)
+    if(newopts) {
+      first = options.port
+      last = first + pp.findPortLimit(options.port, options.limit)
+    } else {
+      first = first ? first : options.port
+      last = last ? last : first + pp.findPortLimit(options.port, options.limit)
+    }
 
     if(!this.data || !(this.data instanceof Object)) {
       this.data = {}
@@ -155,7 +169,7 @@ module.exports = function(grunt) {
                 return
               }
             }.bind({step: i})
-          ]);
+          ])
         }
 
         if(!doing) {
