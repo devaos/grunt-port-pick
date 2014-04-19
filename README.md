@@ -19,7 +19,7 @@ grunt.loadNpmTasks('grunt-port-pick');
 
 Tired of manually configuring ports only to have them conflict?  This task will scan for an unused port, given a range, and swap in the unused port into other tasks' configurations.
 
-###A basic example showing simple port picking:
+####A basic example showing how to inject an available port into a config:
 
 ```js
 // Project configuration.
@@ -42,7 +42,7 @@ grunt.initConfig({
 grunt.registerTask('test', [ 'portPick', 'karma' ]);
 ```
 
-###A complex example showing various ways to use selected ports
+####A complex example showing the various ways you can pick and reference ports:
 
 ```js
 // Project configuration.

@@ -15,7 +15,10 @@
     "gruntplugin",
     "port",
     "scan",
-    "available"
+    "find",
+    "available",
+    "inject",
+    "embed"
   ],
   "author": "Ari Aosved",
   "license": "MIT",
