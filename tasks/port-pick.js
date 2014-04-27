@@ -85,14 +85,14 @@ module.exports = function(grunt) {
         )
       }
     ], function (foundPort) {
-      callback(null, foundPort)
+      callback(null, parseInt(foundPort))
     })
   }
 
   // Inject the selected port into a configuration
   this.injectPort = function(prop, selectedPort) {
     var oldVal = grunt.config.get(prop)
-    var newVal = selectedPort
+    var newVal = parseInt(selectedPort)
 
     if(typeof oldVal == 'string' && oldVal.length > 0) {
       var parsed = url.parse(oldVal);
