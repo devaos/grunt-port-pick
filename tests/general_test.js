@@ -42,7 +42,32 @@ exports.portPick = {
   },
   findPortTest: function(test) {
     var p = new portPick(grunt)
-    test.notEqual(false, p.findPort())
-    test.done()
+    p.first = 8760
+    p.findPort(function(err, port) {
+      test.equal(8760, port)
+      test.done()
+    })
+  },
+  findPortUnavailableTest: function(test) {
+    var net = require('net'),
+        p = new portPick(grunt)
+
+    net.createServer().on('error', function(e) {
+      test.done()
+    }).addListener('listening', function() {
+      p.first = 8762
+      p.findPort(function(err, port) {
+        test.equal(8763, port)
+        test.done()
+      })
+    }).listen(8762, 'localhost');
+  },
+  findTryPortTest: function(test) {
+    var p = new portPick(grunt)
+    p.tryPorts = [8769]
+    p.findPort(function(err, port) {
+      test.equal(8769, port)
+      test.done()
+    })
   }
 };

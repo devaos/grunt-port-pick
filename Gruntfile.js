@@ -28,20 +28,22 @@ module.exports = function(grunt) {
       dist: ['coverage', 'node_modules']
     },
 
-    // Configuration to be run and then tested.
+    // Specify what ports need to be injected where and what additional ports
+    // need to be allotted.
     portPick: {
       options: {
-        port: 7654,
+        port: 8760,
         extra: 1
       },
       selenium: {
         targets: [
           'selenium.options.port',
-          'protractor.test1.args.seleniumPort',
-          'protractor.test2.args.seleniumPort'
+          'protractor.test1.options.args.seleniumPort',
+          'protractor.test1.options.args.baseUrl',
+          'protractor.test2.options.args.seleniumPort'
         ]
       },
-      concurrentFuncTest1: {
+      parallelFuncTest1: {
         options: {
           name: 'port-pick-connect1'
         },
@@ -49,7 +51,7 @@ module.exports = function(grunt) {
           'connect.test1.port',
         ]
       },
-      concurrentFuncTest2: {
+      parallelFuncTest2: {
         options: {
           name: 'port-pick-connect2'
         },
@@ -59,10 +61,11 @@ module.exports = function(grunt) {
       }
     },
 
-    // Sample selenium runner.
+    // Sample selenium runner.  8768 is used if available, otherwise the next
+    // available port starting at 8760 will be used.
     selenium: {
       options: {
-        port: -1
+        port: 8768
       },
     },
 
@@ -70,28 +73,29 @@ module.exports = function(grunt) {
     // servers where the ports are dynamically set.
     connect: {
       test1: {
-        port: -1
+        port: 0
       },
       test2: {
-        port: -1
+        port: 0
       }
     },
 
     // Sample grunt-protractor-runner target to emulate two e2e runners hitting
-    // the two connect web servers started above.
+    // the two connect web servers started above.  Shows the port injected into
+    // a url object as well as via a templated named config.
     protractor: {
       test1: {
         options: {
           args: {
-            seleniumPort: -1,
-            baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect1") %>'
+            seleniumPort: 0,
+            baseUrl: 'http://localhost:0'
           }
         }
       },
       test2: {
         options: {
           args: {
-            seleniumPort: -1,
+            seleniumPort: 0,
             baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect2") %>'
           }
         }
@@ -102,7 +106,7 @@ module.exports = function(grunt) {
     // unit tests alongside with our e2e tests above, using the "extraPorts"
     // option to have the port available via grunt templates.
     karma: {
-      concurrent: {
+      parallel: {
         options: {
           port: '<%= grunt.config.get("port-pick-1") %>'
         }
@@ -118,7 +122,6 @@ module.exports = function(grunt) {
     //   grunt release:patch
     //   grunt release:minor
     //   grunt release:major
-
     release: {
       options: {
         add: false,
@@ -138,10 +141,27 @@ module.exports = function(grunt) {
   grunt.registerTask('testRunSetup', function(){ })
 
   grunt.registerTask('testRunTearDown', function(){
-    var prop, pass = 0, fail = 0, msg = '', used = {}
+    var url = require('url'), prop, pass = 0, fail = 0, msg = '', used = {}
+
+    var parsePort = function(val) {
+      var n = val
+
+      if(typeof val == 'string' && val.length > 0) {
+        var parsed = url.parse(val);
+
+        if(parsed.port && parseInt(parsed.port) == parsed.port) {
+          n = parsed.port
+        }
+      }
+
+      var p = parseInt(n)
+      return (p == n && p > 0) ? p : 0
+    }
 
     var validateConfig = function(prop, orig, match) {
-      var c = grunt.config.get(prop)
+      var c = grunt.config.get(prop),
+          p = parsePort(c)
+
       if(match) {
         if(c.match(match)) {
           pass++
@@ -153,12 +173,11 @@ module.exports = function(grunt) {
         }
         return
       }
-      var p = parseInt(c)
-      if(p != c || p <= 0) {
+      if(p == 0) {
         fail++
         if(!msg)
           msg = 'Functional test failed, ' + prop + ' was ' + c
-      } else if(used[c]) {
+      } else if(used[p]) {
         fail++
         if(!msg)
           msg = 'Functional test failed, ' + prop + ' was ' + c +
@@ -169,8 +188,8 @@ module.exports = function(grunt) {
       }
     }
 
-    new Array('portPick.concurrentFuncTest1.targets',
-     'portPick.concurrentFuncTest2.targets').forEach(function(test){
+    new Array('portPick.parallelFuncTest1.targets',
+     'portPick.parallelFuncTest2.targets').forEach(function(test){
         prop = grunt.config.get(test)
 
         if(typeof prop !== 'undefined')
@@ -179,13 +198,10 @@ module.exports = function(grunt) {
           })
     })
 
-    validateConfig('protractor.test1.options.args.baseUrl',
-      'http://localhost:<%= grunt.config.get("port-pick-connect1") %>', /:\d{4}$/)
-
     validateConfig('protractor.test2.options.args.baseUrl',
       'http://localhost:<%= grunt.config.get("port-pick-connect2") %>', /:\d{4}$/)
 
-    validateConfig('karma.concurrent.options.port',
+    validateConfig('karma.parallel.options.port',
       '<%= grunt.config.get("port-pick-1") %>')
 
     if(fail > 0 || pass == 0)
@@ -202,8 +218,8 @@ module.exports = function(grunt) {
     'clean:coverage',
     'testRunSetup',
     'portPick:selenium',
-    'portPick:concurrentFuncTest1',
-    'portPick:concurrentFuncTest2',
+    'portPick:parallelFuncTest1',
+    'portPick:parallelFuncTest2',
     'testRunTearDown',
     'nodeunit',
     'clean:coverage'

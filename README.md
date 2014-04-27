@@ -34,7 +34,7 @@ grunt.initConfig({
 
   karma: {
     options: {
-      port: -1
+      port: 0
     }
   }
 });
@@ -51,14 +51,15 @@ grunt.initConfig({
   // need to be allotted.
   portPick: {
     options: {
-      port: 7654,
+      port: 8760,
       extra: 1
     },
     selenium: {
       targets: [
         'selenium.options.port',
-        'protractor.test1.args.seleniumPort',
-        'protractor.test2.args.seleniumPort'
+        'protractor.test1.options.args.seleniumPort',
+        'protractor.test1.options.args.baseUrl',
+        'protractor.test2.options.args.seleniumPort'
       ]
     },
     parallelFuncTest1: {
@@ -79,10 +80,11 @@ grunt.initConfig({
     }
   },
 
-  // Sample selenium runner.
+  // Sample selenium runner.  8768 is used if available, otherwise the next
+  // available port starting at 8760 will be used.
   selenium: {
     options: {
-      port: -1
+      port: 8768
     },
   },
 
@@ -90,28 +92,29 @@ grunt.initConfig({
   // servers where the ports are dynamically set.
   connect: {
     test1: {
-      port: -1
+      port: 0
     },
     test2: {
-      port: -1
+      port: 0
     }
   },
 
   // Sample grunt-protractor-runner target to emulate two e2e runners hitting
-  // the two connect web servers started above.
+  // the two connect web servers started above.  Shows the port injected into
+  // a url object as well as via a templated named config.
   protractor: {
     test1: {
       options: {
         args: {
-          seleniumPort: -1,
-          baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect1") %>'
+          seleniumPort: 0,
+          baseUrl: 'http://localhost:0'
         }
       }
     },
     test2: {
       options: {
         args: {
-          seleniumPort: -1,
+          seleniumPort: 0,
           baseUrl: 'http://localhost:<%= grunt.config.get("port-pick-connect2") %>'
         }
       }
@@ -143,11 +146,12 @@ grunt.initConfig({
           'func2',
           '--portPickUsePorts=<%= grunt.config.get("port-pick-used") %>']
       }]
-    },
+    }
+  }
 });
 
 grunt.registerTask('func1', [ 'portPick:parallelFuncTest1', 'connect:test1', 'protractor:test1' ]);
-grunt.registerTask('func2', [ 'portPick:parallelFuncTest1', 'connect:test2', 'protractor:test2' ]);
+grunt.registerTask('func2', [ 'portPick:parallelFuncTest2', 'connect:test2', 'protractor:test2' ]);
 grunt.registerTask('unit', [ 'karma:parallel' ]);
 
 grunt.registerTask('test', [ 'portPick', 'selenium', 'parallel:tests' ]);
