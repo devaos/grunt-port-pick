@@ -146,7 +146,15 @@ module.exports = function(grunt) {
       var ports = grunt.option('portPickUsePorts')
 
       if(ports) {
-        pp.usePorts = ports.split(',')
+        pp.usePorts = String(ports).split(',')
+      }
+    }
+
+    if(!pp.usePorts && pp.options.name) {
+      var ports = grunt.option(pp.options.name)
+
+      if(ports) {
+        pp.usePorts = String(ports).split(',')
       }
     }
 

@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "portscanner": "~0.2.3",
-    "async": "~0.7.0"
+    "async": "~0.8.0"
   },
   "peerDependencies": {
     "grunt": "*"
