@@ -8,17 +8,17 @@
 module.exports = function(grunt) {
 
   var defaults = {
-        port: 8765,
-        limit: false,
-        extra: 0,
-        hostname: '0.0.0.0',
-        name: ''
-      },
-      url = require('url'),
-      async = require('async'),
-      portscanner = require('portscanner'),
-      used = [],
-      pp = this
+        port: 8765
+      , limit: false
+      , extra: 0
+      , hostname: '0.0.0.0'
+      , name: ''
+      }
+    , url = require('url')
+    , async = require('async')
+    , portscanner = require('portscanner')
+    , used = []
+    , pp = this
 
   this.options = defaults
   this.first = false
@@ -73,6 +73,9 @@ module.exports = function(grunt) {
       function(callback){
         portscanner.findAPortNotInUse(pp.first, pp.last, pp.options.hostname,
           function(error, foundPort) {
+            if(error && foundPort === false)
+              grunt.fatal('An error occurred looking for a port - ' + error)
+
             // If we use a port, increment so that it isn't used again
             if(foundPort !== false) {
               pp.first = foundPort + 1
@@ -113,10 +116,11 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('portPick',
     'Scan and pick an available port, for other grunt tasks', function() {
 
-    var done = this.async(),
-        self = this,
-        newopts = false,
-        tmpopts = this.options(defaults)
+    var done = this.async()
+      , self = this
+      , newopts = false
+      , tmpopts = this.options(defaults)
+      , ports
 
     if(pp.options.port != tmpopts.port || pp.options.limit != tmpopts.limit)
       newopts = true
@@ -143,7 +147,7 @@ module.exports = function(grunt) {
     }
 
     if(!pp.usePorts) {
-      var ports = grunt.option('portPickUsePorts')
+      ports = grunt.option('portPickUsePorts')
 
       if(ports) {
         pp.usePorts = String(ports).split(',')
@@ -151,7 +155,7 @@ module.exports = function(grunt) {
     }
 
     if(!pp.usePorts && pp.options.name) {
-      var ports = grunt.option(pp.options.name)
+      ports = grunt.option(pp.options.name)
 
       if(ports) {
         pp.usePorts = String(ports).split(',')

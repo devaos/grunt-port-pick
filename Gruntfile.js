@@ -15,10 +15,11 @@ module.exports = function(grunt) {
         asi: true,
         node: true,
         validthis: true,
-        loopfunc: true
+        loopfunc: true,
+        laxcomma: true,
       },
       files: {
-        src: ['tasks/**/*.js','<%= nodeunit.tests %>']
+        src: ['tasks/**/*.js', '<%= nodeunit.tests %>']
       }
     },
 
@@ -216,6 +217,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', [
     'clean:coverage',
+    'jshint', 
     'testRunSetup',
     'portPick:selenium',
     'portPick:parallelFuncTest1',
@@ -225,5 +227,5 @@ module.exports = function(grunt) {
     'clean:coverage'
   ])
 
-  grunt.registerTask('default', ['jshint', 'test'])
+  grunt.registerTask('default', ['test'])
 }
