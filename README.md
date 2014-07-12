@@ -160,7 +160,7 @@ grunt.registerTask('test', [ 'portPick', 'selenium', 'parallel:tests' ]);
 ##Options
 
 1. `port` -- The port to start scanning from, inclusive, for the first available port to use.  Defaults to 8765.
-2. `limit` -- Do not scan for a port after this one, fail if one is not found between `port` and `limit`.  Defaults to false, port-pick will scan all the way up to 65535.
+2. `limit` -- Do not scan for more than this number of ports, fail if one is not found between `port` and `port` + `limit`.  Defaults to false, port-pick will scan all the way up to 65535.
 3. `extra` -- Set the number of extra port-pick-# configurations to supply.  Defaults to 0.  If set to greater than 0, it will populate <%= port-pick-1 %>, <%= port-pick-2 %>, etc.
 4. `hostname` -- The IP/hostname to bind to when checking for available ports.  Defaults to 0.0.0.0, so binds to all interfaces.
 5. `name` -- Set the property name for port-pick to use when picking a port for a target.  Defaults to undefined where it will not populate a separate configuration with the target's selected port.
