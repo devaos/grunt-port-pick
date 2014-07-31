@@ -34,7 +34,7 @@ module.exports = function(grunt) {
     portPick: {
       options: {
         port: 8760,
-        extra: 1
+        extra: 4
       },
       selenium: {
         targets: [
@@ -204,6 +204,26 @@ module.exports = function(grunt) {
 
     validateConfig('karma.parallel.options.port',
       '<%= grunt.config.get("port-pick-1") %>')
+
+    var prev = 0;
+    for(var i = 1; i <= 4; ++i) {
+      var prop = 'port-pick-' + i
+      var extra = grunt.config.get(prop)
+
+      if(!extra) {
+        fail++
+        if(!msg)
+          msg = 'Functional test failed, ' + prop + ' was ' + extra
+      } else
+        pass++
+
+      if(extra <= prev) {
+        fail++
+        if(!msg)
+          msg = 'Functional test failed, ' + prop + ' was ' + extra + ' <= ' + prev
+      } else
+        pass++
+    }
 
     if(fail > 0 || pass == 0)
       grunt.fatal(pass + '/' + (pass+fail) + ' functional tests passed' +

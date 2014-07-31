@@ -199,48 +199,45 @@ module.exports = function(grunt) {
 
       // Set some configurations for extra ports template interpolation
       function(callback) {
-        pp.tryPorts = []
-        var doing = false
-        for(var i = 1; i <= pp.options.extra; i++) {
-          var c = grunt.config.get('port-pick-' + i)
+        var step = 0
 
-          // With multiple tasks, do not find a port that we've already found
-          // in a previous task
-          if(c) {
-            if(step + 1 >= pp.options.extra && !doing)
-              done()
-            continue
+        async.whilst(
+          function() {
+            return ++step <= pp.options.extra
+          },
+          function(callback) {
+            pp.tryPorts = []
+            var c = grunt.config.get('port-pick-' + step)
+
+            // With multiple tasks, do not find a port that we've already found
+            // in a previous task
+            if(c) {
+              callback()
+              return
+            }
+
+            async.waterfall([
+              pp.findPort,
+
+              function(selectedPort, callback) {
+                if(selectedPort === false)
+                  grunt.fatal('No available port was found')
+
+                grunt.config.set('port-pick-' + this.step, selectedPort)
+                grunt.log.writeln( '>> '.green + 'port-pick-' + this.step + '=' +
+                  selectedPort)
+
+                callback()
+              }.bind({step: step})
+            ],
+            function(err) {
+              callback()
+            })
+          },
+          function(err) {
+            done()
           }
-          else
-            doing = true
-
-          var step = i
-          async.waterfall([
-            pp.findPort,
-
-            function(selectedPort, callback) {
-              if(selectedPort === false)
-                grunt.fatal('No available port was found')
-
-              grunt.config.set('port-pick-' + this.step, selectedPort)
-              grunt.log.writeln( '>> '.green + 'port-pick-' + this.step + '=' +
-                selectedPort)
-
-              if(step + 1 >= pp.options.extra) {
-                done()
-              }
-              else {
-                callback(null)
-                return
-              }
-            }.bind({step: i})
-          ])
-        }
-
-        if(!doing) {
-          done()
-          return
-        }
+        )
       }
     ])
   })
