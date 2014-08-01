@@ -237,8 +237,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', [
     'clean:coverage',
-    'jshint', 
+    'jshint',
     'testRunSetup',
+    'portPickIndie',
     'portPick:selenium',
     'portPick:parallelFuncTest1',
     'portPick:parallelFuncTest2',

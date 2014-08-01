@@ -113,6 +113,80 @@ module.exports = function(grunt) {
 
   //============================================================================
 
+  grunt.registerTask('portPickIndie',
+   'Scan and pick an available port', function() {
+
+    var done = this.async()
+      , self = this
+      , newopts = false
+
+    if(grunt.config.get('portPickIndie') &&
+      grunt.config.get('portPickIndie.options'))
+      newopts = grunt.config.get('portPickIndie.options')
+    else if(grunt.config.get('portPick') &&
+      grunt.config.get('portPick.options'))
+      newopts = grunt.config.get('portPick.options')
+
+    if(!newopts || !newopts.hasOwnProperty('extra')) {
+      done()
+      return
+    }
+
+    new Array('port', 'limit', 'extra', 'hostname', 'name').forEach(
+     function(prop) {
+      if(newopts.hasOwnProperty(prop))
+        pp.options[prop] = newopts[prop]
+    })
+
+    pp.first = pp.options.port
+    pp.last = pp.first + pp.findPortLimit(pp.options.port, pp.options.limit)
+
+    var step = 0
+
+    async.whilst(
+      function() {
+        return ++step <= pp.options.extra
+      },
+      function(callback) {
+        pp.tryPorts = []
+        var c = grunt.config.get('port-pick-' + step)
+
+        // With multiple tasks, do not find a port that we've already found
+        // in a previous task
+        if(c) {
+          callback()
+          return
+        }
+
+        async.waterfall([
+          pp.findPort,
+
+          function(selectedPort, callback) {
+            if(selectedPort === false)
+              grunt.fatal('No available port was found')
+
+            grunt.config.set('port-pick-' + this.step, selectedPort)
+            grunt.log.writeln( '>> '.green + 'port-pick-' + this.step + '=' +
+              selectedPort)
+
+            callback()
+          }.bind({step: step})
+        ],
+        function(err) {
+          callback()
+        })
+      },
+      function(err) {
+        // reset back to defaults so that if there is a portPick task, it starts
+        // fresh
+        pp.options = defaults
+        done()
+      }
+    )
+  })
+
+  //============================================================================
+
   grunt.registerMultiTask('portPick',
     'Scan and pick an available port, for other grunt tasks', function() {
 

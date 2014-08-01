@@ -42,6 +42,29 @@ grunt.initConfig({
 grunt.registerTask('test', [ 'portPick', 'karma' ]);
 ```
 
+####A streamlined example of the simplified portPickIndie task:
+
+```js
+// Project configuration.
+grunt.initConfig({
+  portPickIndie: {
+    options: {
+      port: 7000,
+      extra: 4
+    }
+  }
+});
+
+grunt.registerTask('showOff', 'Dump picked ports', function() {
+  grunt.log.writeln(grunt.config.get('port-pick-1'));
+  grunt.log.writeln(grunt.config.get('port-pick-2'));
+  grunt.log.writeln(grunt.config.get('port-pick-3'));
+  grunt.log.writeln(grunt.config.get('port-pick-4'));
+});
+
+grunt.registerTask('default', ['portPickIndie', 'showOff']);
+```
+
 ####A complex example showing the various ways you can pick and reference ports:
 
 ```js
