@@ -56,6 +56,9 @@ module.exports = function(grunt) {
     async.series([
       function(callback){
         async.eachSeries(pp.tryPorts, pp.checkPort, function(foundPort) {
+          if (foundPort) {
+            while (pp.tryPorts.shift() !== foundPort);
+          }
           callback(foundPort)
         })
       },
