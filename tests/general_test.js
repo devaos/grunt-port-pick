@@ -69,5 +69,16 @@ exports.portPick = {
       test.equal(8769, port)
       test.done()
     })
+  },
+  findTryMultiPortTest: function(test) {
+    var p = new portPick(grunt)
+    p.tryPorts = [8769,8770]
+    p.findPort(function(err, port) {
+      test.equal(8769, port)
+      p.findPort(function(err, port) {
+        test.equal(8770, port)
+        test.done()
+      })
+    })
   }
 };
