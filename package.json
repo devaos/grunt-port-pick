@@ -30,7 +30,7 @@
     "portscanner": "^1.0.0"
   },
   "peerDependencies": {
-    "grunt": "*"
+    "grunt": ">=0.4.5"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
