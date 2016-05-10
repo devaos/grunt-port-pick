@@ -65,7 +65,7 @@ module.exports = function(grunt) {
       function(callback){
         if(pp.usePorts && pp.usePorts.length > 0) {
           var foundPort = pp.usePorts.shift()
-          pp.first = foundPort + 1
+          pp.first = parseInt(foundPort) + 1
           used.push(foundPort)
           grunt.config.set('port-pick-used', used.join(','))
           callback(foundPort)
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
 
             // If we use a port, increment so that it isn't used again
             if(foundPort !== false) {
-              pp.first = foundPort + 1
+              pp.first = parseInt(foundPort) + 1
               used.push(foundPort)
               grunt.config.set('port-pick-used', used.join(','))
             }
